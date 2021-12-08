@@ -1,49 +1,49 @@
 
 
-
-
-
-summarySE <- function(data = NULL, measurevar, groupvars = NULL,
-                      na.rm = FALSE, conf.interval = 0.95, .drop = TRUE) {
+summarySE <- function(.data, DV, between = NULL, within = NULL, ID = NULL, CI = 0.95, DV_prefix=NULL){
   
-  ## Summarizes data.  Gives count, mean, standard
-  ## deviation, standard error of the mean, and
-  ## confidence interval (default 95%).  data: a data
-  ## frame.  measurevar: the name of a column that
-  ## contains the variable to be summariezed groupvars:
-  ## a vector containing names of columns that contain
-  ## grouping variables na.rm: a boolean that indicates
-  ## whether to ignore NA's conf.interval: the percent
-  ## range of the confidence interval (default is 95%)
+  ### first aggregate the data on the level of participants
+  df <- .data %>% 
+    dplyr::group_by(across(c({{ ID }}, {{ between }}, {{ within }}))) %>%
+    dplyr::summarise(sub_DV = base::mean({{DV}}, na.rm=T)) %>% #When you have an env-variable that is a character vector
+    dplyr::ungroup()
   
-  library(plyr)
-  
-  # New version of length which can handle NA's: if
-  # na.rm==T, don't count them
-  length2 <- function(x, na.rm = FALSE) {
-    if (na.rm)
-      sum(!is.na(x)) else length(x)
+  ### adjust the data to compute the within-subject se
+  if(!(missing(within))){
+    df <- df %>% 
+      dplyr::group_by(dplyr::across(c({{ ID }}, {{ between }}))) %>%
+      dplyr::mutate(user_mean = base::mean(sub_DV, na.rm = TRUE)) %>%
+      dplyr::ungroup() %>%
+      dplyr::group_by({{ between }}) %>%
+      dplyr::mutate(grand_mean = base::mean(sub_DV, na.rm = TRUE)) %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(DV_adjusted = sub_DV - user_mean + grand_mean)
   }
   
-  # This does the summary. For each group's data
-  # frame, return a vector with N, mean, and sd
-  datac <- ddply(data, groupvars, .drop = .drop, .fun = function(xx,
-                                                                 col) {
-    c(N = length2(xx[[col]], na.rm = na.rm), mean = mean(xx[[col]],
-                                                         na.rm = na.rm), sd = sd(xx[[col]], na.rm = na.rm))
-  }, measurevar)
+  ###aggregate data on level of plot
+  df <- df %>% 
+    dplyr::group_by(across(c({{ between }}, {{ within }}))) %>%
+    dplyr::summarize(
+      mean = base::mean(DV_adjusted, na.rm = TRUE),
+      n = dplyr::n(),
+      se = stats::sd(DV_adjusted, na.rm = TRUE)/base::sqrt(n),
+      ci = stats::qt(1-(1-CI)/2, n-1)*se,
+    ) %>%
+    dplyr::ungroup() %>% 
+    rename()
   
-  # Rename the 'mean' column
-  datac <- rename(datac, c(mean = measurevar))
-  
-  datac$se <- datac$sd/sqrt(datac$N)  # Calculate standard error of the mean
-  
-  # Confidence interval multiplier for standard error
-  # Calculate t-statistic for confidence interval:
-  # e.g., if conf.interval is .95, use .975
-  # (above/below), and use df=N-1
-  ciMult <- qt(conf.interval/2 + 0.5, datac$N - 1)
-  datac$ci <- datac$se * ciMult
-  
-  return(datac)
-}
+  ###add the Morey-correction to the se
+  if(!(missing(within))){
+    if(!(missing(between))){
+      df <- df %>% 
+        dplyr::group_by({{ between }}) %>%
+        dplyr::mutate(se = se * base::sqrt(dplyr::n()/(dplyr::n()-1))) %>%
+        dplyr::ungroup()
+    }else{
+      df <- df %>% 
+        dplyr::mutate(se = se * base::sqrt(dplyr::n()/(dplyr::n()-1)))
+    }
+    
+    ### return df
+    return(df)
+  }}
