@@ -1,6 +1,6 @@
 
 
-summarySE <- function(.data, DV, between = NULL, within = NULL, ID = NULL, CI = 0.95, DV_prefix=NULL){
+summarySE <- function(.data, DV, between = NULL, within = NULL, ID = NULL, CI = 0.95){
   
   ### first aggregate the data on the level of participants
   df <- .data %>% 
@@ -18,6 +18,9 @@ summarySE <- function(.data, DV, between = NULL, within = NULL, ID = NULL, CI = 
       dplyr::mutate(grand_mean = base::mean(sub_DV, na.rm = TRUE)) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(DV_adjusted = sub_DV - user_mean + grand_mean)
+  } else{
+    df <- df %>% 
+      dplyr::mutate(DV_adjusted = sub_DV)
   }
   
   ###aggregate data on level of plot
@@ -42,8 +45,8 @@ summarySE <- function(.data, DV, between = NULL, within = NULL, ID = NULL, CI = 
     }else{
       df <- df %>% 
         dplyr::mutate(se = se * base::sqrt(dplyr::n()/(dplyr::n()-1)))
-    }
+    }}
     
     ### return df
     return(df)
-  }}
+  }
