@@ -62,7 +62,7 @@ summarySE <-
             se = se * morey_correction
           )
       }
-      select(df,!morey_correction)
+      df <- select(df,!morey_correction)
     }
     
     ### return df
