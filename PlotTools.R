@@ -62,7 +62,7 @@ summarySE <-
 
 ##### Default setting for all plots #####
 
-theme_myDefault <- function(fontSize = 10, facet="grey", gridLines=FALSE) {
+theme_myDefault <- function(fontSize = 10, facet="grey", gridLines=TRUE) {
   
   theme_set(theme_bw())
   
@@ -71,18 +71,17 @@ theme_myDefault <- function(fontSize = 10, facet="grey", gridLines=FALSE) {
       ### black background for facet panels
       strip.background = element_rect(color="black", fill="gray25", linetype="solid"),
       ### white color of facet labels
-      strip.text = element_text(color = "white")
-    )
+      strip.text = element_text(color = "white"))
   }
   
+  ### set font size for facet labels
   theme_update(
-    ### set font size for facet labels
     strip.text.x = element_text(size = fontSize),
     strip.text.y = element_text(size = fontSize)
-    )
+  )
   
-  if(gridLines == FALSE){
-    ### remove grid lines from panel
+  ### remove grid lines from panel
+  if(!gridLines){
     theme_update(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank())
