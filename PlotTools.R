@@ -1,6 +1,6 @@
 
 
-
+##### aggregate table #####
 summarySE <-
   function(.data,
            DV,
@@ -68,3 +68,39 @@ summarySE <-
     ### return df
     return(df)
   }
+
+##### Default setting for all plots #####
+
+theme_myDefault <- function(fontSize = 10, facet="grey", gridLines=FALSE) {
+  
+  theme_set(theme_bw())
+  
+  if (facet == "black") {
+    theme_update(
+      ### black background for facet panels
+      strip.background = element_rect(color="black", fill="gray25", linetype="solid"),
+      ### white color of facet labels
+      strip.text = element_text(color = "white")
+    )
+  }
+  
+  theme_update(
+    ### set font size for facet labels
+    strip.text.x = element_text(size = fontSize),
+    strip.text.y = element_text(size = fontSize)
+    )
+  
+  if(gridLines == FALSE){
+    ### remove grid lines from panel
+    theme_update(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank())
+  }
+}
+
+
+
+
+
+
+
