@@ -2,12 +2,8 @@
 
 ##### aggregate table #####
 summarySE <-
-  function(.data,
-           DV,
-           between = NULL,
-           within = NULL,
-           ID = NULL,
-           CI = 0.95) {
+  function(.data, DV, between = NULL, within = NULL, ID = NULL, CI = 0.95) {
+    
     ### first aggregate the data on the level of participants
     df <- .data %>%
       dplyr::group_by(dplyr::across(c({{ID}}, {{between}}, {{within}}))) %>%
@@ -40,16 +36,11 @@ summarySE <-
       ) %>%
       dplyr::ungroup()
     
-    
     ### add the Morey-correction to the se
     if (!(is.null(within))) {
       if (!(is.null(between))) {
         df <- df %>%
-          dplyr::group_by(dplyr::across(c({
-            {
-              between
-            }
-          }))) %>%
+          dplyr::group_by(dplyr::across(c({{between}}))) %>%
           dplyr::mutate(
             morey_correction = base::sqrt(dplyr::n() / (dplyr::n() - 1)),
             se = se * morey_correction
