@@ -88,9 +88,3 @@ theme_myDefault <- function(fontSize = 10, facet="grey", gridLines=TRUE) {
   }
 }
 
-
-
-
-
-
-
