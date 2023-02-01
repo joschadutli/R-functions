@@ -75,7 +75,7 @@ createForm <- function(DV, fixFact = NULL, randFact = NULL, ID = "subject", inte
 #' @export
 #'
 #' @examples
-calculateBF <- function(data, DV, fixFact, randFact, ID, intercept = 1, corr= FALSE, args, name, path) {
+calculateBF <- function(data, DV, fixFact, randFact, testFact=NULL, ID, intercept = 1, corr= FALSE, args, name, path) {
   
   # set default arguments for the functions ------------------------------------
   
@@ -112,23 +112,25 @@ calculateBF <- function(data, DV, fixFact, randFact, ID, intercept = 1, corr= FA
   
   # Fix effect -------------------------------------------
   
+  if (is.null(testFact)) testFact <- fixFact
   
-  for (i in 1:length(fixFact)) {
+  
+  for (i in 1:length(testFact)) {
     
-    testFact <- fixFact[length(fixFact)+1-i]
-    testFixFacts <- fixFact[!fixFact==testFact]
-    model_name <- stringr::str_glue("{name}_noFix-{gsub(':', '-', testFact)}")
+    target <- fixFact[length(fixFact)+1-i]
+    tmpFixFact <- fixFact[!fixFact==target]
+    model_name <- stringr::str_glue("{name}_noFix-{gsub(':', '-', target)}")
     
     # fit the model or read the model from the folder.
     if (!file.exists(stringr::str_glue("{path}{model_name}"))) {
-      testModel <- myModel(testFixFacts, randFact, name = model_name)
+      testModel <- myModel(tmpFixFact, randFact, name = model_name)
     } else {
       testModel <- readRDS(stringr::str_glue("{path}{model_name}"))
     }
     
     # which model is the best model
     factBF <- brms::bayes_factor(fullModel, testModel)$bf
-    outputBF[stringr::str_glue("fix_{testFact}")] = factBF
+    outputBF[stringr::str_glue("fix_{target}")] = factBF
     
   }
   
