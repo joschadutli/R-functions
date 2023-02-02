@@ -148,7 +148,7 @@ cal_BF <-  function(
     randForm <- str_c(c(intercept, randFacts), collapse = " + ") 
     
     myForm <- as.formula(
-      stringr::str_glue("{DV} ~ {Int} + {fixForm} + (1 + {randForm} {bar} gr({group}, by = {by_text}, cor = {corr}))")
+      stringr::str_glue("{DV} ~ {Int} + {fixForm} + (1 + {randForm} | gr({group}, by = {by_text}, cor = {corr}))")
       )
     
     new_args <- list(
@@ -157,11 +157,12 @@ cal_BF <-  function(
       data = new_data
     )
     
+    input_args <- args
+    
     if (length(fixFacts)<1) {
-      input_args <- args
       input_args$prior <- input_args$prior %>% filter(!class=="b")}
     
-    do.call(brms::brm,args = append(new_args, args))
+    do.call(brms::brm,args = append(new_args, input_args))
   }
   
   # Full model -----------------------------------------------------------------
