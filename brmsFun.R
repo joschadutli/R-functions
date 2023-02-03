@@ -144,11 +144,11 @@ cal_BF <-  function(
   
   myModel <- function(fixFacts=NULL, randFacts=NULL, name) {
     
-    fixForm <- str_c(c(intercept, fixFacts), collapse = " + ") 
-    randForm <- str_c(c(intercept, randFacts), collapse = " + ") 
+    fixForm <- str_c(c(Int, fixFacts), collapse = " + ") 
+    randForm <- str_c(c(Int, randFacts), collapse = " + ") 
     
     myForm <- as.formula(
-      stringr::str_glue("{DV} ~ {Int} + {fixForm} + (1 + {randForm} | gr({group}, by = {by_text}, cor = {corr}))")
+      stringr::str_glue("{DV} ~ {fixForm} + ({randForm} | gr({group}, by = {by_text}, cor = {corr}))")
       )
     
     new_args <- list(
