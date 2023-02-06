@@ -235,22 +235,31 @@ createForm <- function(DV, fixFact = NULL, randFact = NULL, ID = "subject", inte
 
 ##### Load model #####
 
-runModel <- function( args, formula, data, path, reload=FALSE){
+#' Fit the model using brm
+#'
+#' @param formula An object of class formula.
+#' @param data An object of class data.frame containing data of all variables used in the model.
+#' @param args A list of arguments that need to input into brm function.
+#' @param path A character string. The folder you want to store the model.
+#' @param name A character string. The name of the new model.
+#'
+
+runModel <- function(formula, data, args, path, name){
+  
+  file_path <- paste(path,name, sep = "")
   
   # model arguments
   model_args <- append(
     list(formula = formula, 
          data = data,
-         file = path),args)
+         file = file_path),args)
   
-  if (!file.exists(path) | reload){
-    # run model with brms
-    brm_model <- do.call(brms::brm, model_args)
-  } else {
-    # load model from local file
-    brm_model <- readRDS(file = path)
-  }
-  return(brm_model)
+  if (!file.exists(file_path)) warning(
+    "The model is existent already. 
+    Please terminate the work if you do not want to fit the model again.")
+
+  brm_model <- do.call(brms::brm, model_args)
+
 }
 
 
