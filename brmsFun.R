@@ -64,21 +64,47 @@ getFactComb <- function(vars) {
 #' @param name a character string. The prefix of all the models
 #'
 #' @return a list including all to-be-test effects
-#' @export
-#'
-#' @examples
+#' 
+#' 
 cal_BF <-  function(
     data, DV, fixEffects, randEffects, group, by = NULL, 
-    corr = FALSE, intercept = TRUE, testEffects = NULL, args, path, name) {
+    corr = FALSE, intercept = TRUE, testEffects = fixEffects, args, path, name) {
   
   
   ### Default parameters
-  if (is.null(testEffects)) testEffects <- fixEffects
   Int <- ifelse(intercept, 1, 0)
   ### check if an additional grouping argument is provided:
   by_text <- ifelse(is.null(by), "NULL", stringr::str_glue("c({stringr::str_c(by, collapse = ', ')})"))
-  testEffects = rev(testEffects) # to make sure that effects are tested from complex to simple, 
   
+  
+  ## Full model ----------------------------------------------------------------
+  
+  # fit the model or read the model from the folder.
+  if (file.exists(stringr::str_glue("{path}{name}_full"))) {
+    testModel <- readRDS(stringr::str_glue("{path}{name}_full"))
+  } else {
+    full_fixForm <- str_c(c(Int, fixEffects), collapse = " + ") 
+    full_randForm <- str_c(c(Int, randEffects), collapse = " + ")
+    
+    full_form <- as.formula(
+      stringr::str_glue("{DV} ~ {full_fixForm} + ({full_randForm} | gr({group}, by = {by_text}, cor = {corr}))")
+    )
+    
+    full_args <- append(args, list(
+      formula = full_form,
+      file = stringr::str_glue("{path}{name}_full"),
+      data = data
+    ))
+    
+    fullModel <- do.call(brms::brm,args = full_args)
+  }
+  
+
+  # if testEffects equals NULL, return full model
+  if (is.null(testEffects)) return (fullModel)
+  
+  
+  ## Prepare new data set and new variable names -----------------------------------------
   
   ### create the model fixed part of the model formula based on the passed arguments:
   formula_fixed = reformulate(c(Int, fixEffects), intercept = TRUE)
@@ -140,7 +166,7 @@ cal_BF <-  function(
   }
   
   
-  # set default arguments for the functions ------------------------------------
+  ## set default arguments for the functions -----------------------------------
   
   myModel <- function(fixFacts=NULL, randFacts=NULL, name) {
     
@@ -167,13 +193,15 @@ cal_BF <-  function(
   
   # Full model -----------------------------------------------------------------
   
-  fullModel <- myModel(fixEffects_new, randEffects_new, name = stringr::str_glue("{name}_full"))
+  # fullModel <- myModel(fixEffects_new, randEffects_new, name = stringr::str_glue("{name}_full"))
   
-  
+
   # Output variable
   outputBF <- list()
   
   # Fix effect -------------------------------------------
+  
+  testEffects = rev(testEffects) # to make sure that effects are tested from complex to simple
   
   
   for (i in 1:length(testEffects)) {
@@ -233,7 +261,6 @@ createForm <- function(DV, fixFact = NULL, randFact = NULL, ID = "subject", inte
 
 
 
-##### Load model #####
 
 #' Fit the model using brm
 #'
@@ -290,7 +317,17 @@ monitorJob <- function(status = "read", path) {
 }
 
 
-
+Pairwise_Comparisons <- function(model, parameters) {
+  
+  marginal_means <- emmeans::emmeans(model, parameters)
+  pairwise_comparisons <-  pairs(marginal_means)
+  
+  prior_model <- bayestestR::unupdate(model)
+  prior_contrasts <- pairs(emmeans::emmeans(prior_model, parameters))
+  
+  return (bayestestR::bayesfactor_parameters(pairwise_comparisons, prior_contrasts))
+  
+}
 
 
 
