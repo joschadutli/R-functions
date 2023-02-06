@@ -279,7 +279,8 @@ runModel <- function(formula, data, args, path, name){
   model_args <- append(
     list(formula = formula, 
          data = data,
-         file = file_path),args)
+         file = file_path,
+         file_refit = "on_change"),args)
   
   if (!file.exists(file_path)) warning(
     "The model is existent already. 
