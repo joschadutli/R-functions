@@ -281,10 +281,6 @@ runModel <- function(formula, data, args, path, name){
          data = data,
          file = file_path,
          file_refit = "on_change"),args)
-  
-  if (!file.exists(file_path)) warning(
-    "The model is existent already. 
-    Please terminate the work if you do not want to fit the model again.")
 
   brm_model <- do.call(brms::brm, model_args)
 
