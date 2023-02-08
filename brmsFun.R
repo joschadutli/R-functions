@@ -317,7 +317,6 @@ monitorJob <- function(status = "read", path) {
 Pairwise_Comparisons <- function(model, parameters) {
   
   prior_model <- bayestestR::unupdate(model)
-  output = list()
   
   for (i in 1:length(parameters)) {
     
@@ -329,8 +328,6 @@ Pairwise_Comparisons <- function(model, parameters) {
     print(bayestestR::bayesfactor_parameters(post_contrasts, prior_contrasts))
     
   }
-  
-  return (output)
   
 }
 
