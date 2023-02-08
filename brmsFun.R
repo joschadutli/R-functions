@@ -316,13 +316,21 @@ monitorJob <- function(status = "read", path) {
 
 Pairwise_Comparisons <- function(model, parameters) {
   
-  marginal_means <- emmeans::emmeans(model, parameters)
-  pairwise_comparisons <-  pairs(marginal_means)
-  
   prior_model <- bayestestR::unupdate(model)
-  prior_contrasts <- pairs(emmeans::emmeans(prior_model, parameters))
+  output = list()
   
-  return (bayestestR::bayesfactor_parameters(pairwise_comparisons, prior_contrasts))
+  for (i in 1:length(parameters)) {
+    
+    par = parameters[i]
+    
+    post_contrasts <- pairs(emmeans::emmeans(model, par))
+    prior_contrasts <- pairs(emmeans::emmeans(prior_model, par))
+    
+    print(bayestestR::bayesfactor_parameters(post_contrasts, prior_contrasts))
+    
+  }
+  
+  return (output)
   
 }
 
