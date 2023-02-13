@@ -177,6 +177,8 @@ cal_BF <-  function(
       stringr::str_glue("{DV} ~ {fixForm} + ({randForm} | gr({group}, by = {by_text}, cor = {corr}))")
       )
     
+    message(stringr::str_glue("Current formula: {myForm}"))
+    
     new_args <- list(
       formula = myForm,
       file = stringr::str_glue("{path}{name}"),
@@ -274,6 +276,8 @@ createForm <- function(DV, fixFact = NULL, randFact = NULL, ID = "subject", inte
 runModel <- function(formula, data, args, path, name){
   
   file_path <- paste(path,name, sep = "")
+  
+  message(stringr::str_glue("Current formula: {formula}"))
   
   # model arguments
   model_args <- append(
