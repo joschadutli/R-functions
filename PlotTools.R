@@ -1,6 +1,20 @@
 
 
-##### aggregate table #####
+#' aggregate table
+#' 
+#' This function is used to create a aggregate table.
+#'
+#' @param .data 
+#' @param DV Dependent variable
+#' @param between between-subject variables
+#' @param within within-subject variables
+#' @param ID group variable
+#' @param CI confident interval
+#'
+#' @return
+#' @export
+#'
+#' @examples
 summarySE <-
   function(.data, DV, between = NULL, within = NULL, ID = NULL, CI = 0.95) {
     
@@ -87,4 +101,38 @@ theme_myDefault <- function(fontSize = 10, facet="grey", gridLines=TRUE) {
       panel.grid.minor = element_blank())
   }
 }
+
+
+
+
+
+#' Adjust width
+#' 
+#' This function is used to adjust the width of error bar. 
+#' It can be used when the number of level is different in different conditions.
+#' It will create a new column called "width".
+#' you can set `width = width` in the `aes()` function
+#'
+#' @param .data 
+#' @param group 
+#' @param width 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+adjust_width <- function (.data, group, width = 0.05) {
+  
+  .data %>% 
+    group_by(dplyr::across(c({{group}}))) %>% 
+    mutate(width = width * n()) %>% 
+    ungroup()
+  
+}
+  
+  
+
+
+
+
 
