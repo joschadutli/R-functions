@@ -318,15 +318,13 @@ monitorJob <- function(status = "read", path) {
 }
 
 
-Pairwise_Comparisons <- function(model, parameters) {
+Pairwise_Comparisons <- function(model, prior_model = NULL, specs) {
   
-
-  prior_model <- bayestestR::unupdate(model, verbose = TRUE)
-
+  if (is.null(prior_model)) prior_model <- bayestestR::unupdate(model, verbose = TRUE)
   
-  for (i in 1:length(parameters)) {
+  for (i in 1:length(specs)) {
     
-    par = parameters[i]
+    par = specs[i]
     
     post_contrasts <- pairs(emmeans::emmeans(model, par))
     prior_contrasts <- pairs(emmeans::emmeans(prior_model, par))
