@@ -324,7 +324,8 @@ Pairwise_Comparisons <- function(model, parameters) {
     expr = {
       prior_model <- brms::prior_draws(model)
       },
-    error = {
+    error = function(e){
+      message(e)
       message("Prior samples were not saved.")
       prior_model <- bayestestR::unupdate(model)
     }
