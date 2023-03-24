@@ -320,7 +320,7 @@ Pairwise_Comparisons <- function(model, prior_model = NULL, specs) {
   
   for (i in 1:length(specs)) {
     
-    par = specs[i]
+    par = as.formula(specs[i])
     
     post_contrasts <- pairs(emmeans::emmeans(model, par))
     prior_contrasts <- pairs(emmeans::emmeans(prior_model, par))
