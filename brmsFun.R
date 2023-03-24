@@ -320,17 +320,9 @@ monitorJob <- function(status = "read", path) {
 
 Pairwise_Comparisons <- function(model, parameters) {
   
-   tryCatch(
-    expr = {
-      prior_model <- brms::prior_draws(model)
-      },
-    error = function(e){
-      message(e)
-      message("Prior samples were not saved.")
-      prior_model <- bayestestR::unupdate(model)
-    }
-  )
-  
+
+  prior_model <- bayestestR::unupdate(model, verbose = TRUE)
+
   
   for (i in 1:length(parameters)) {
     
@@ -344,6 +336,8 @@ Pairwise_Comparisons <- function(model, parameters) {
   }
   
 }
+
+
 
 
 
