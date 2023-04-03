@@ -314,7 +314,7 @@ monitorJob <- function(status = "read", path) {
 }
 
 
-Pairwise_Comparisons <- function(model, prior_model = NULL, specs) {
+Pairwise_Comparisons <- function(model, prior_model = NULL, specs, interaction = FALSE) {
   
   if (is.null(prior_model)) prior_model <- bayestestR::unupdate(model, verbose = TRUE)
   
@@ -322,8 +322,16 @@ Pairwise_Comparisons <- function(model, prior_model = NULL, specs) {
     
     par = as.formula(specs[i])
     
-    post_contrasts <- pairs(emmeans::emmeans(model, par))
-    prior_contrasts <- pairs(emmeans::emmeans(prior_model, par))
+    if (interaction) {
+      post_contrasts <- emmeans::emmeans(model, par) %>% 
+        contrast(interaction = c("pairwise","pairwise"))
+      prior_contrasts <- emmeans::emmeans(prior_model, par) %>% 
+        contrast(interaction = c("pairwise","pairwise"))
+    } else {
+      post_contrasts <- pairs(emmeans::emmeans(model, par))
+      prior_contrasts <- pairs(emmeans::emmeans(prior_model, par))
+    }
+    
     
     print(bayestestR::bayesfactor_parameters(post_contrasts, prior_contrasts))
     
