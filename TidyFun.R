@@ -71,6 +71,37 @@ get_JATOS_data <- function(token, url = "https://coglab.xyz/jatos/api/v1/results
 }
 
 
+# Read JATOS data
+read_JATOS_files <- function(files) {
+  
+  # Create an empty string to store the data
+  combined_text = ""
+  
+  # Iterate over each file in the list of files to read
+  for (i in 1:length(files)){
+    
+    # Read in the raw text from the current file
+    raw_text <- read_file(files[i])
+    
+    combined_text <- paste(combined_text, raw_text)
+    
+  }
+  
+  # Clean up the raw text by replacing certain characters with others
+  split_text <- gsub("\\}\\]\\s\\[\\{", "\\},\\{",combined_text)
+  split_text <- gsub("\\}\\]\\[\\{", "\\},\\{",split_text)
+  
+  # Convert the cleaned up text to a data frame
+  data <- jsonlite::fromJSON(split_text)
+  
+  # Return the combined data frame
+  return(data)
+  
+}
+
+
+
+
 
 filterOutlier <- function(.data, vars, std = 3) {
 
