@@ -29,11 +29,11 @@ get_JATOS_data <- function(token, url = "https://coglab.xyz/jatos/api/v1/results
   res <- httr::GET(
     url = str_glue("{url}?studyUuid={uuId}&batchId={batchId}"),
     httr::add_headers(.headers=headers), 
-    write_disk(str_glue("{dataPath}tmp.jrzip"))
+    write_disk(str_glue("{dataPath}tmp.jrzip"), overwrite = TRUE)
   )
   
   # Unzip the downloaded file and extract the file names into a list
-  filelist = unzip(str_glue("{dataPath}tmp.jrzip"), exdir=str_glue("{dataPath}JATOS_DATA"))
+  filelist = unzip(str_glue("{dataPath}tmp.jrzip"), exdir=str_glue("{dataPath}JATOS_DATA"), overwrite = TRUE)
   
   # Extract relevant data from the file names and store in a data frame
   file_table <- data.frame(filelist) %>% 
@@ -47,7 +47,7 @@ get_JATOS_data <- function(token, url = "https://coglab.xyz/jatos/api/v1/results
   file.remove(str_glue("{dataPath}tmp.jrzip"))
   
   # Read the metadata from the last file in the list (assuming it is in JSON format)
-  metaData <- read_json(filelist[length(filelist)])$data[[1]]$studyResults
+  metaData <- jsonlite::read_json(filelist[length(filelist)])$data[[1]]$studyResults
   
   # Extract relevant metadata from the metadata list and store in a data frame
   info_table <- data.frame()
@@ -63,7 +63,7 @@ get_JATOS_data <- function(token, url = "https://coglab.xyz/jatos/api/v1/results
   
   # Combine the file data and metadata into a single data frame
   outcome <- info_table %>% 
-    inner_join(file_table) %>% 
+    right_join(file_table) %>% 
     filter(!is.na(resultID))
   
   # Return the combined data frame
@@ -98,8 +98,6 @@ read_JATOS_files <- function(files) {
   return(data)
   
 }
-
-
 
 
 
