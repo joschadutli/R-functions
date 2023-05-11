@@ -317,6 +317,7 @@ Pairwise_Comparisons <- function(model, prior_model = NULL, specs, interaction =
 #' 
 #' @param path A folder path used to save the file
 #' 
+#' 
 init_multijobs <- function(path = NULL) {
   
   Table_status <- data.frame(
@@ -354,6 +355,7 @@ init_multijobs <- function(path = NULL) {
 #'@param maxCore a number. How many cores are available on this computer.
 #'
 #'@return There is no return. The model will be saved as a file automatically.
+#'
 #'
 smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCore = 8){
   
