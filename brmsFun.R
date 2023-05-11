@@ -28,9 +28,6 @@ getFactComb <- function(vars) {
 
 
 
-
-
-
 #' Calculating Bayes Factors
 #' 
 #' @author Chenyu Li
@@ -260,8 +257,6 @@ createForm <- function(DV, fixFact = NULL, randFact = NULL, ID = "subject", inte
 
 
 
-
-
 #' Fit the model using brm
 #'
 #' @param formula An object of class formula.
@@ -284,33 +279,6 @@ runModel <- function(formula, data, args, path, name){
 
   brm_model <- do.call(brms::brm, model_args)
 
-}
-
-
-##### monitor the status of job #####
-
-monitorJob <- function(status = "read", path) {
-  
-  filePath <- str_glue("{path}monitor_number.rds")
-  
-  if (!file.exists(filePath)) {
-    mon_num <- 0
-  } else {
-    mon_num <- readRDS(filePath)
-  }
-  
-  if (status=='start') {
-    mon_num = mon_num + 1
-  } else if (status=='stop') {
-    mon_num = mon_num - 1
-  } else if (status=="reset"){
-    mon_num <- 0
-  } else {
-    return (mon_num)
-  }
-  
-  saveRDS(mon_num,filePath)
-  
 }
 
 
@@ -339,6 +307,141 @@ Pairwise_Comparisons <- function(model, prior_model = NULL, specs, interaction =
   
 }
 
+
+
+
+#' Initialize job log.
+#' 
+#' @description
+#' This function will create a data frame including model information and store it in local disk
+#' 
+#' @param path A folder path used to save the file
+#' 
+init_multijobs <- function(path = NULL) {
+  
+  Table_status <- data.frame(
+    index = 0,
+    core = 0,
+    status = "completed",
+    priority = 1)
+  
+  if (is.null(path)){
+    file_path = "./job_log.rds"
+  } else {
+    file_path = str_glue("{path}job_log.rds")
+  }
+  
+  write_rds(Table_status, file_path)
+  
+}
+
+#' A smart function which can find a appropriate time to launch models.
+#' 
+#' @author Chenyu Li
+#' @description
+#' This is a funtion used to running brms in job environment. 
+#' The function relys on job log file. It will detect how many jobs are running 
+#' and how many cores are available on the computer.
+#' Only when the computer has sufficient free cores and the model is in the first sequence, the model will start.
+#' 
+#'@param formula a formula. The formula that you want to input into `brm` function.
+#'@param data a data.frame. The data that you want to use to train the model.
+#'@param args a list. All the other arguments that you want to input into `brm` function.
+#'@param path a folder path. Where do you want to save your model.(It should also be the place to store the job log file)
+#'@param name a string. The name of the file.
+#'@param priority a number. The default is 1, higer number indicates higher priority. 
+#'Models with higher priority will be launched in advance.
+#'@param maxCore a number. How many cores are available on this computer.
+#'
+#'@return There is no return. The model will be saved as a file automatically.
+#'
+smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCore = 8){
+  
+  # get information
+  nCore = args$cores
+  log_path = str_glue("{path}job_log.rds")
+  Table_status <- read_rds(log_path)
+  myIndex <- nrow(Table_status)
+  
+  # if the job log file has not been created, create a new one
+  if (!file.exists(log_path)) {
+    init_multijobs(path = path)
+    message("There is no job log file, a new one has been created")
+  }
+  
+  # input model informaiton to the log
+  Table_status <- Table_status %>% 
+    rbind(data.frame(
+      index = myIndex,
+      core = nCore,
+      status = "waiting",
+      priority = priority
+    ))
+  
+  write_rds(Table_status, log_path)
+  
+  #' check how many models are running,
+  #' wiat until the model meet the running condition
+  while (TRUE) {
+    
+    # Read job log
+    Table_status <- read_rds(log_path)
+    
+    # How many models are running
+    Table_running <- Table_status %>% 
+      filter(status=="running")
+    # How many cores have been used
+    Using_cores = sum(Table_running$core)
+    
+    # Adjust the waiting list
+    Table_waiting <- Table_status %>% 
+      filter(status=="waiting") %>% 
+      mutate(prio_idx = max(priority) - priority) %>% 
+      arrange(prio_idx,index)
+    
+    # Get the waiting index
+    WaitIndex = which(Table_waiting$index == myIndex)
+    
+    # If the model are in the first place and there are suffcient cores, run the model
+    if (WaitIndex==1 & nCore <= maxCore - Using_cores) {
+      
+      # Adjust the status of the model as running.
+      Table_status <- read_rds(log_path)
+      Table_status[which(Table_status$index == myIndex), "status"] = "running"
+      
+      write_rds(Table_status, log_path)
+      
+      break
+      
+      # Print the waiting information
+    } else {
+      message(str_glue("There is/are {nrow(Table_running)} models running. The current model is in {WaitIndex} place."))
+      # Recheck everything after n*30 seconds
+      Sys.sleep(WaitIndex*30)
+    }
+    
+  }
+  
+  # The full name of the file (including the paht)
+  file_name <- paste(path,name, sep = "")
+  
+  # model arguments
+  model_args <- append(
+    list(formula = formula, 
+         data = data,
+         file = file_name,
+         file_refit = "on_change"),args)
+  
+  brm_model <- do.call(brms::brm, model_args)
+  
+  message("The model has been done ...")
+  # Adjust the status of the model as completed.
+  Table_status <- read_rds(log_path)
+  Table_status[which(Table_status$index == myIndex), "status"] = "completed"
+  write_rds(Table_status, log_path)
+  
+  
+}
 
 
 
