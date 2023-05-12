@@ -366,13 +366,16 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
   Table_status <- read_rds(log_path)
   myIndex <- nrow(Table_status)
   
+  # check whether the maxCore was smaller than the need of the core
+  if (nCore > maxCore) stop("The current model requires more cores than the maximum number of cores available on the computer.")
+  
   # if the job log file has not been created, create a new one
   if (!file.exists(log_path)) {
     init_multijobs(path = path)
     message("There is no job log file, a new one has been created")
   }
   
-  # input model informaiton to the log
+  # input model information to the log
   Table_status <- Table_status %>% 
     rbind(data.frame(
       index = myIndex,
@@ -384,7 +387,7 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
   write_rds(Table_status, log_path)
   
   #' check how many models are running,
-  #' wiat until the model meet the running condition
+  #' wait until the model meet the running condition
   while (TRUE) {
     
     # Read job log
@@ -405,7 +408,7 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
     # Get the waiting index
     WaitIndex = which(Table_waiting$index == myIndex)
     
-    # If the model are in the first place and there are suffcient cores, run the model
+    # If the model are in the first place and there are sufficient cores, run the model
     if (WaitIndex==1 & nCore <= maxCore - Using_cores) {
       
       # Adjust the status of the model as running.
@@ -425,7 +428,7 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
     
   }
   
-  # The full name of the file (including the paht)
+  # The full name of the file (including the path)
   file_name <- paste(path,name, sep = "")
   
   # print the start time
@@ -459,7 +462,7 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
     }
   )
   
-  message("The model has been done ...")
+  message("The model has been done.")
   # Adjust the status of the model as completed.
   Table_status <- read_rds(log_path)
   Table_status[which(Table_status$index == myIndex), "status"] = "completed"
