@@ -427,6 +427,10 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
   # The full name of the file (including the paht)
   file_name <- paste(path,name, sep = "")
   
+  # print the start time
+  start_time = Sys.time()
+  message(str_glue("The model start to run at {start_time}"))
+  
   # model arguments
   model_args <- append(
     list(formula = formula, 
@@ -445,17 +449,20 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
       Table_status[which(Table_status$index == myIndex), "status"] = "failed"
       
       write_rds(Table_status, log_path)
+    },
+    finally = {
+      # print the end time
+      end_time = Sys.time()
+      message(str_glue("The model has completed at {end_time}"))
+      message(str_glue("It takes {round(as.numeric(end_time - start_time, units = 'hours'),2)} hours."))
     }
   )
-  
-  
   
   message("The model has been done ...")
   # Adjust the status of the model as completed.
   Table_status <- read_rds(log_path)
   Table_status[which(Table_status$index == myIndex), "status"] = "completed"
   write_rds(Table_status, log_path)
-  
   
 }
 
