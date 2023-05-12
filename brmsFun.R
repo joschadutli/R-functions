@@ -434,7 +434,21 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
          file = file_name,
          file_refit = "on_change"),args)
   
-  brm_model <- do.call(brms::brm, model_args)
+  
+  tryCatch(
+    expr = {
+      brm_model <- do.call(brms::brm, model_args)
+    },
+    error = {
+      # Adjust the status of the model as running.
+      Table_status <- read_rds(log_path)
+      Table_status[which(Table_status$index == myIndex), "status"] = "failed"
+      
+      write_rds(Table_status, log_path)
+    }
+  )
+  
+  
   
   message("The model has been done ...")
   # Adjust the status of the model as completed.
@@ -446,5 +460,26 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
 }
 
 
+#' Set up multiple job system
+#' 
+#' @author Chenyu Li
+#' 
+#' @param operation description
+#' 
+#' @param path A folder path used to save the file
+#' 
+#' 
+read_jobLog <- function(path = NULL) {
+
+  if (is.null(path)){
+    file_path = "./job_log.rds"
+  } else {
+    file_path = str_glue("{path}job_log.rds")
+  }
+
+  Table_status <- read_rds(file_path)
+  print(Table_status)
+
+}
 
 
