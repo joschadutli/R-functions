@@ -353,11 +353,12 @@ init_multijobs <- function(path = NULL) {
 #'@param priority a number. The default is 1, higer number indicates higher priority. 
 #'Models with higher priority will be launched in advance.
 #'@param maxCore a number. How many cores are available on this computer.
+#'@param checkInt a number. How long would the function check the job log. The default value is 30 seconds.
 #'
 #'@return There is no return. The model will be saved as a file automatically.
 #'
 #'
-smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCore = 8){
+smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCore = 8, checkInt = 30){
   
   # get information
   nCore = args$cores
@@ -418,8 +419,8 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
       # Print the waiting information
     } else {
       message(str_glue("There is/are {nrow(Table_running)} models running. The current model is in {WaitIndex} place."))
-      # Recheck everything after n*30 seconds
-      Sys.sleep(WaitIndex*30)
+      # Recheck everything after n*checkInt seconds
+      Sys.sleep(WaitIndex*checkInt)
     }
     
   }
