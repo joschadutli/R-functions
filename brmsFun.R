@@ -411,12 +411,6 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
     # If the model are in the first place and there are sufficient cores, run the model
     if (WaitIndex==1 & nCore <= maxCore - Using_cores) {
       
-      # Adjust the status of the model as running.
-      Table_status <- read_rds(log_path)
-      Table_status[which(Table_status$index == myIndex), "status"] = "running"
-      
-      write_rds(Table_status, log_path)
-      
       break
       
       # Print the waiting information
@@ -445,14 +439,25 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
   
   tryCatch(
     expr = {
+      # Adjust the status of the model as running.
+      Table_status <- read_rds(log_path)
+      Table_status[which(Table_status$index == myIndex), "status"] = "running"
+      write_rds(Table_status, log_path)
+      
+      # Run the model
       brm_model <- do.call(brms::brm, model_args)
     },
-    error = {
+    error = function(e){
+      
       # Adjust the status of the model as running.
       Table_status <- read_rds(log_path)
       Table_status[which(Table_status$index == myIndex), "status"] = "failed"
-      
       write_rds(Table_status, log_path)
+      
+      # message error
+      message(e)
+      
+      return(NA)
     },
     finally = {
       # print the end time
