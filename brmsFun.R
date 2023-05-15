@@ -355,7 +355,6 @@ read_jobLog <- function(path = NULL) {
   }
   
   Table_status <- read_rds(file_path)
-  print(Table_status)
   
   return(Table_status)
   
