@@ -593,9 +593,6 @@ smart_runFuns <- function(fun, args, path, core = 1, priority = 1, maxCore = 8, 
     
   }
   
-  # The full name of the file (including the path)
-  file_name <- paste(path,name, sep = "")
-  
   # print the start time
   start_time = Sys.time()
   message(str_glue("The model start to run at {start_time}"))
