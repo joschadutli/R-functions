@@ -637,3 +637,28 @@ smart_runFuns <- function(fun, args, path, core = 1, priority = 1, maxCore = 8, 
   )
   
 }
+
+
+#' A function used to extract posterior distribution from a model fit
+#'
+#'@author Chenyu Li
+#'
+#'@param fit a model fit
+#'@param effects a string or vector; The name of the effect
+#'
+#'
+extractPost <- function(fit, effects) {
+  
+  post_data <- fit %>% 
+    tidy_draws() %>% 
+    select(.chain, .iteration, .draw, starts_with("b_")) %>% 
+    pivot_longer(cols = starts_with("b_"),
+                 names_to = "coef",
+                 values_to = "post") %>% 
+    separate_wider_delim(coef, "_", names = c(NA, "M3_par","effect"), cols_remove = TRUE) %>% 
+    separate_wider_delim(effect, ":", names = effects) %>% 
+    mutate_at(effects, .funs = function(x) x = str_remove(x,str_glue(effects, collapse = "|")))
+  
+  return (post_data)
+  
+}
