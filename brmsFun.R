@@ -416,7 +416,7 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
   
   # set up the progress bar
   pb = txtProgressBar(min = 0, max = myIndex, initial = 0, style = 3)
-  print("The model is not in the waiting list ...")
+  message("The model is not in the waiting list ...")
   
   #' check how many models are running,
   #' wait until the model meet the running condition
@@ -572,7 +572,7 @@ smart_runFuns <- function(fun, args, path, core = 1, priority = 1, maxCore = 8, 
   
   # set up the progress bar
   pb = txtProgressBar(min = 0, max = myIndex, initial = 0, style = 3)
-  print("The model is not in the waiting list ...")
+  message("The model is not in the waiting list ...")
   
   #' check how many models are running,
   #' wait until the model meet the running condition
