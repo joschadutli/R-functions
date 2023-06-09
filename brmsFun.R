@@ -415,7 +415,7 @@ smart_runModels <- function(formula, data, args, path, name, priority = 1, maxCo
   write_rds(Table_status, log_path)
   
   # set up the progress bar
-  message("The model is not in the waiting list ...")
+  message("The model is now in the waiting list ...")
   pb = txtProgressBar(min = 0, max = myIndex, initial = 0, style = 3)
   
   
@@ -572,7 +572,7 @@ smart_runFuns <- function(fun, args, path, core = 1, priority = 1, maxCore = 8, 
   write_rds(Table_status, log_path)
   
   # set up the progress bar
-  message("The model is not in the waiting list ...")
+  message("The model is now in the waiting list ...")
   pb = txtProgressBar(min = 0, max = myIndex, initial = 0, style = 3)
   
   
