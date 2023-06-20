@@ -78,22 +78,11 @@ read_JATOS_files <- function(files) {
   combined_text = ""
   
   # Iterate over each file in the list of files to read
-  for (i in 1:length(files)){
-    
-    # Read in the raw text from the current file
-    raw_text <- read_file(files[i])
-    
-    combined_text <- paste(combined_text, raw_text)
-    
-  }
-  
-  # Clean up the raw text by replacing certain characters with others
-  split_text <- gsub("\\}\\]\\s\\[\\{", "\\},\\{",combined_text)
-  split_text <- gsub("\\}\\]\\[\\{", "\\},\\{",split_text)
-  
-  # Convert the cleaned up text to a data frame
-  data <- jsonlite::fromJSON(split_text)
-  
+  combined_text <- map_vec(files, .f = read_file, .progress = TRUE)
+  single_text <- str_c(combined_text, collapse = "")
+  modified_text <- gsub("\\}\\]\\s{0,}\\[\\{", "\\},\\{", single_text, perl = TRUE)
+  data <- jsonlite::fromJSON(modified_text)
+
   # Return the combined data frame
   return(data)
   
