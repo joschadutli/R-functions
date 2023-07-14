@@ -675,7 +675,7 @@ smart_runFuns <- function(fun, args, path, core = 1, priority = 1, maxCore = 8, 
 #'@param effects a string or vector; The name of the effect
 #'
 #'
-extractPost <- function(fit, effects) {
+extractPost <- function(fit, effects, par_name = "M3_par") {
   
   post_data <- fit %>% 
     tidy_draws() %>% 
@@ -683,117 +683,10 @@ extractPost <- function(fit, effects) {
     pivot_longer(cols = starts_with("b_"),
                  names_to = "coef",
                  values_to = "post") %>% 
-    separate_wider_delim(coef, "_", names = c(NA, "M3_par","effect"), cols_remove = TRUE) %>% 
+    separate_wider_delim(coef, "_", names = c(NA, par_name,"effect"), cols_remove = TRUE) %>% 
     separate_wider_delim(effect, ":", names = effects) %>% 
-    mutate_at(effects, .funs = function(x) x = str_remove(x,str_glue(effects, collapse = "|")))
+    mutate_at(effects, .funs = function(x) x = str_remove(x,paste(effects, collapse = "|")))
   
   return (post_data)
   
 }
-
-
-#' Fit data with specific models in sequence and compare models with calculating Bayes factor.
-#' 
-#' @param data A data.frame; The data that models want to fit
-#' @param table A data.frame; The argument that you want to input into the function (to generate the model)
-#' @param fun A function; The function used to generate models
-#' @param model_path string; The place where models are saved.
-#' @param task description string; The name of the task.
-#' @param sample A number; The number of iteration for each chain.
-#' @param warmup A number; The number of warm up before sampling.
-#' @param core A number;
-#' 
-#' 
-# modelComparison <- function(data, table, fun, model_path, task, brmArgs, maxCore = 8) {
-#   
-#   for (i in 1:nrow(table)) {
-#     
-#     model_name = as.character(table[i,"model_name"])
-#     
-#     output <- do.call(fun, args = as.list(table[i,1:(ncol(table)-4)]))
-#     
-#     Formula_M3 <- output$formula
-#     Prior_M3 <- output$prior
-#     
-#     ## Import arguments
-#     Args_M3 <- list(
-#       family = multinomial(refcat = NA),
-#       prior = Prior_M3) %>% 
-#       append(brmArgs)
-#     
-#     ## Fit model
-#     job({
-#       
-#       print(task)
-#       source("https://raw.githubusercontent.com/chenyu-psy/R-functions/main/brmsFun.R")
-#       
-#       smart_runModels(
-#         formula = Formula_M3,
-#         data = data,
-#         args = Args_M3,
-#         path = model_path,
-#         name = model_name,
-#         priority = 1,
-#         checkInt = 180,
-#         maxCore = maxCore
-#       )
-#     }, title = str_glue("Model {i}: {model_name}"), import = "auto")
-#     
-#     Sys.sleep(20)
-#     
-#     # skip the model comparison for the first model
-#     if (i == 1)
-#       next
-#     
-#     # calculate the Bayes factor and save the results
-#     job({
-#       
-#       print(task)
-#       source("https://raw.githubusercontent.com/chenyu-psy/R-functions/main/brmsFun.R")
-#       
-#       smart_runFuns(
-#         fun = function(current_index) {
-#           Table_BF = read_csv(str_glue("{model_path}BayesFactor_{task}_rarc.csv"))
-#           
-#           best_index = as.numeric(Table_BF[current_index - 1, "best_model"])
-#           
-#           # model_name
-#           current_name = Table_BF[current_index, 'model_name']
-#           best_name = Table_BF[best_index, 'model_name']
-#           # read model
-#           fit_current <-
-#             readRDS(str_glue("{model_path}{current_name}.rds"))
-#           fit_best <-
-#             readRDS(str_glue("{model_path}{best_name}.rds"))
-#           
-#           BF = bayes_factor(fit_current, fit_best)
-#           
-#           Table_BF = read_csv(str_glue("{model_path}BayesFactor_{task}_rarc.csv"))
-#           
-#           Table_BF[current_index, "comparison"] = str_glue("model {current_index} vs. model {best_index}")
-#           Table_BF[current_index, "BF"] = BF$bf
-#           Table_BF[current_index, "best_model"] = ifelse(BF$bf > 5, current_index, best_index)
-#           
-#           write_csv(Table_BF, str_glue("{model_path}BayesFactor_{task}_rarc.csv"))
-#           
-#         },
-#         args = list(current_index = i),
-#         path = model_path,
-#         core = 1,
-#         maxCore = 1,
-#         checkInt = 180
-#       )
-#       
-#       
-#     }, import = "auto", title = str_glue("BF: model {i} vs. the best model"))
-#     
-#     Sys.sleep(20)
-#     
-#   }
-# }
-
-
-
-
-
-
