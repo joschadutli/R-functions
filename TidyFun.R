@@ -54,10 +54,10 @@ get_JATOS_data <- function(token, url = "https://coglab.xyz/jatos/api/v1/results
   for (a in 1:length(metaData)) {
     info_table[a, "resultID"] = metaData[[a]]$id
     info_table[a, "componentID"] = metaData[[a]]$componentResults[[1]]$id
-    info_table[a, "duration"] = ifelse(is.null(metaData[[a]]$duration),
-                                       metaData[[a]]$lastSeenDate - metaData[[a]]$startDate,
-                                       sapply(strsplit(metaData[[a]]$duration, ":"), function(n) as.numeric(n) %*% c(3600, 60, 1))
-    )
+    # info_table[a, "duration"] = ifelse(is.null(metaData[[a]]$duration),
+    #                                    metaData[[a]]$lastSeenDate - metaData[[a]]$startDate,
+    #                                    sapply(strsplit(metaData[[a]]$duration, ":"), function(n) as.numeric(n) %*% c(3600, 60, 1))
+    # )
     info_table[a, "studyState"] = metaData[[a]]$studyState
   }
   
