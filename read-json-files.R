@@ -1,0 +1,24 @@
+
+
+#' This function is used to read json files
+#' 
+#' @author Chenyu Li
+#' @param files A vector of file paths that you want to read.
+#' 
+#' @return a data frame combined all the data
+#'
+read_json_files <- function(files) {
+  
+  # Create an empty string to store the data
+  combined_text = ""
+  
+  # Iterate over each file in the list of files to read
+  combined_text <- map_vec(files, .f = read_file, .progress = TRUE)
+  single_text <- str_c(combined_text, collapse = "")
+  modified_text <- gsub("\\}\\]\\s{0,}\\[\\{", "\\},\\{", single_text, perl = TRUE)
+  data <- jsonlite::fromJSON(modified_text)
+  
+  # Return the combined data frame
+  return(data)
+  
+}
