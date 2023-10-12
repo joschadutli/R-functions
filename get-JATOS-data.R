@@ -15,7 +15,8 @@
 #'
 get_JATOS_data <- function(token, url = "https://coglab.xyz/jatos/api/v1/results", studyId, batchId, dataPath = NULL) {
   
-  require(httr) # Load the httr library
+  if (!require(httr)) install.packages("httr") # Load the httr library
+  if (!require(tidyverse)) install.packages("tidyverse") # load the tidyverse library
   
   if (is.null(dataPath)) dataPath = "./" # Set the default data path
   
