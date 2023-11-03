@@ -16,6 +16,7 @@
 get_JATOS_data <- function(token, url = "https://coglab.xyz/jatos/api/v1/results", studyId, batchId, dataPath = NULL) {
   
   if (!require(httr)) install.packages("httr") # Load the httr library
+  if (!(require(jsonlite))) install.packages("jsonlite") # Load the jsonlite library
   if (!require(tidyverse)) install.packages("tidyverse") # load the tidyverse library
   
   if (is.null(dataPath)) dataPath = "./" # Set the default data path
@@ -28,7 +29,7 @@ get_JATOS_data <- function(token, url = "https://coglab.xyz/jatos/api/v1/results
   res <- httr::GET(
     url = str_glue("{url}?studyId={studyId}&batchId={batchId}"),
     httr::add_headers(.headers=headers), 
-    write_disk(str_glue("{dataPath}tmp.jrzip"), overwrite = TRUE)
+    httr::write_disk(str_glue("{dataPath}tmp.jrzip"), overwrite = TRUE)
   )
   
   # Unzip the downloaded file and extract the file names into a list
