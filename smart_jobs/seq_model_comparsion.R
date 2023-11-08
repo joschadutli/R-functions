@@ -1,10 +1,22 @@
 
-#'
+#' Run multiple models sequentially.
+#' 
+#' @author Chenyu Li
+#' @param task A string; The name of the task
+#' @param pars A list; The parameters to be tested
+#' @param form_fun A function; The function used to generate the formula
+#' @param prior_fun A function; The function used to generate the prior
+#' @param brmArgs A list; The arguments used in brm
+#' @param model_path A string; The path to save the model
+#' @param sample_path A string; The path to save the samples
+#' @param maxCore An integer; The maximum number of cores to use
+#' @param sample_check A boolean; Whether to check the samples
+#' 
+#' @return There is no return. The model and results will be saved as a file automatically.
 #'
 seq_model_comparsion <- function(
     task,
     pars,
-    data,
     form_fun,
     prior_fun,
     brmArgs,
@@ -13,15 +25,23 @@ seq_model_comparsion <- function(
     maxCore=NULL,
     sample_check = TRUE) {
   
+  # check packages
+  packages = c("brms", "dplyr", "stringr", "glue", "progress")
+  for (pkg in packages) {
+    if (!require(pkg, character.only = TRUE)) {
+      install.packages(pkg, character.only = TRUE)
+      library(pkg, character.only = TRUE)
+    }
+  }
+  
   # original model
   Pars_best <- do.call(expand_grid, args = pars)[1, ]
-
+  
   # All the assumptions that need to be tested for the parameter
   List_parameters <- as.list(Pars_best)
-  for (par in test) {
-    List_parameters[[par]] <- unname(unlist(pars[par]))
-  }
-  Table_toBeTeseted <- do.call(expand_grid, args = List_parameters) %>% 
+  List_parameters[[names(pars)[1]]] <- unname(unlist(pars[names(pars)[1]]))
+  
+  Table_temp <- do.call(expand_grid, args = List_parameters) %>% 
     rowwise() %>% 
     mutate(part_name = paste(names(.), unlist(c_across(1:ncol(.))), sep = "", collapse = "_"),
            model_name = str_glue("Model_{task}_M3_{part_name}"),
@@ -40,14 +60,12 @@ seq_model_comparsion <- function(
       sample_ck = ifelse(file.exists(sample_file), 1, 0)
     )
   
-  
   write_rds(Table_temp, file = str_glue("{model_path}temporary_table.rds"))
   
-  # test assumptions for each parameter step by step
+  # test assumptions for each parameter
   for (par in names(pars)) {
     
-    
-    ############################### run models
+    # test assumptions for each parameter step by step
     for (i in 1:length(pars[[par]])) {
       ## Fit model
       job({
@@ -60,18 +78,15 @@ seq_model_comparsion <- function(
             
             Table_temp <- read_rds(str_glue("{model_path}temporary_table.rds"))
             
-            model_formula <- do.call(model_fun, args = as.list(Table_temp[iRow, names(pars)]))
+            model_formula <- do.call(form_fun, args = as.list(Table_temp[iRow, names(pars)]))
             model_prior <- do.call(prior_fun, args = as.list(Table_temp[iRow, names(pars)]))
             
             
             ## Import arguments
             Args_M3 <- list(
-              family = multinomial(refcat = NA),
               formula = model_formula,
               prior = model_prior,
-              data = data,
-              file = str_glue('{model_path}{Table_temp[iRow, "model_name"]}'),
-              file_refit = "on_change"
+              file = str_glue('{model_path}{Table_temp[iRow, "model_name"]}')
             ) %>%
               append(brmArgs)
             
@@ -85,7 +100,7 @@ seq_model_comparsion <- function(
           args = list(
             model_path = model_path,
             iRow = i),
-          path = model_path,
+          log_path = model_path,
           core = brmArgs$core,
           maxCore = maxCore,
           checkInt = 5
@@ -137,13 +152,13 @@ seq_model_comparsion <- function(
             model_path = model_path,
             iRow = i,
             maxCore = maxCore),
-          path = model_path,
+          log_path = model_path,
           core = round(maxCore / 2),
           maxCore = maxCore,
           checkInt = 5
         )
         
-      }, title = str_glue("Sample {i}: {par}-{pars[[par]][i]}"))
+      }, title = str_glue("Sample {i}: {par}-{pars[[par]][i]}"), import = "auto")
       
       Sys.sleep(9)
       
@@ -226,6 +241,7 @@ seq_model_comparsion <- function(
           
         },
         args = list(model_path = model_path),
+        log_path = model_path,
         core = maxCore,
         maxCore = maxCore,
         checkInt = 5
