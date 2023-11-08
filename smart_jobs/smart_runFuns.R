@@ -11,7 +11,6 @@
 #'@param formula a formula. The formula that you want to input into `brm` function.
 #'@param data a data.frame. The data that you want to use to train the model.
 #'@param args a list. All the other arguments that you want to input into `brm` function.
-#'@param model_path a folder path. Where do you want to save your model.(It should also be the place to store the job log file)
 #'@param name a string. The name of the file.
 #'@param log_path a folder path. Where do you want to save your job log file.
 #'@param priority a number. The default is 1, higher number indicates higher priority. 
@@ -22,7 +21,7 @@
 #'@return There is no return. The model will be saved as a file automatically.
 #'
 #'
-smart_runFuns <- function(fun, args, model_path, log_path = model_path, priority = 1, core = 1, maxCore = NULL, checkInt = 19){
+smart_runFuns <- function(fun, args, log_path, priority = 1, core = 1, maxCore = NULL, checkInt = 19){
   
   # check packages
   packages = c("brms", "dplyr", "stringr", "glue", "progress")
