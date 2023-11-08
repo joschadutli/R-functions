@@ -9,6 +9,7 @@
 #' @param brmArgs A list; The arguments used in brm
 #' @param model_path A string; The path to save the model
 #' @param sample_path A string; The path to save the samples
+#' @param bf_path A string; The path to save the Bayes factor
 #' @param maxCore An integer; The maximum number of cores to use
 #' @param sample_check A boolean; Whether to check the samples
 #' 
@@ -22,6 +23,7 @@ seq_model_comparsion <- function(
     brmArgs,
     model_path,
     sample_path,
+    bf_path,
     maxCore=NULL,
     sample_check = TRUE) {
   
@@ -202,9 +204,7 @@ seq_model_comparsion <- function(
           }
           
           # save the table
-          save_path = str_glue(
-            "./Modes/BayesFactor_backup/BayesFactor_{task}_{par}.csv"
-          )
+          save_path = str_glue("{bf_path}BayesFactor_{task}_{par}.csv")
           
           # select columns and save the table
           table <- table %>% 
