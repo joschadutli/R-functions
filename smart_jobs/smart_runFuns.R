@@ -56,7 +56,7 @@ smart_runFuns <- function(fun, args, log_path, priority = 1, core = 1, maxCore =
   }
   
   # check whether the maxCore was smaller than the need of the core
-  if (nCore > maxCore) stop("The current model requires more cores than the maximum number of cores available on the computer.")
+  if (core > maxCore) stop("The current model requires more cores than the maximum number of cores available on the computer.")
   if (maxCore > parallel::detectCores()) stop("The current model requires more cores than the maximum number of cores available on the computer.")
   
   # set a index for the model
