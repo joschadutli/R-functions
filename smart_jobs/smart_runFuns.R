@@ -27,7 +27,7 @@ smart_runFuns <- function(fun, args, log_path, priority = 1, core = 1, maxCore =
   packages = c("brms", "dplyr", "stringr", "glue", "progress")
   for (pkg in packages) {
     
-    if (!require(pkg)) install.packages(pkg)
+    if (!require(pkg, character.only = TRUE)) install.packages(pkg)
     library(pkg, character.only = TRUE)
   }
   
