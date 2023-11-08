@@ -102,7 +102,7 @@ smart_runFuns <- function(fun, args, log_path, priority = 1, core = 1, maxCore =
     WaitIndex = which(Table_waiting$index == job_index)
     
     # If the model are in the first place and there are sufficient cores, run the model
-    if (WaitIndex==1 & nCore <= maxCore - Using_cores) {
+    if (WaitIndex==1 & core <= maxCore - Using_cores) {
       
       # update progress bar
       setTxtProgressBar(pb, value = job_index)
