@@ -27,7 +27,7 @@ smart_runModels <- function(formula=NULL, data=NULL, prior=NULL, args, model_pat
   packages = c("brms", "dplyr", "stringr", "glue", "progress")
   for (pkg in packages) {
     
-    if (!require(pkg)) install.packages(pkg)
+    if (!require(pkg, character.only = TRUE)) install.packages(pkg)
     library(pkg, character.only = TRUE)
   }
   

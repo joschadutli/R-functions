@@ -5,7 +5,6 @@
 #' 
 #' @param path A folder path used to save the file
 #' 
-#' 
 init_jobLog <- function(path = NULL) {
   
   Table_status <- data.frame(
