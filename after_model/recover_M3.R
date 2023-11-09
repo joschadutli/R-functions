@@ -14,7 +14,7 @@ gen_M3_data <- function(
     parsData,
     respOpts,
     formulas,
-    group = c(".chain", ".iteartion", ".draw"),
+    group = c(".chain", ".iteartion", ".draw")
     ){
   
   ## check packages and install if necessary
