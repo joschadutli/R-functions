@@ -16,6 +16,8 @@ gen_M3_data <- function(
     group = NULL,
     choiceRule = "Luce",){
   
+  choiceRule = tolower(choiceRule)
+  
   ## check packages and install if necessary
   if (!require(dplyr)) {
     install.packages("dplyr")
@@ -48,8 +50,8 @@ gen_M3_data <- function(
     left_join(respOpts) %>%
     mutate(
       exprob = case_when(
-        choiceRule == "Softmax" | choiceRule == "expLuce" ~ exp(activation) * nOpt,
-        choiceRule == "Luce" ~ activation * nOpt
+        choiceRule == "softmax" | choiceRule == "expluce" ~ exp(activation) * nOpt,
+        choiceRule == "luce" ~ activation * nOpt
       )) %>% 
     group_by(across({{group}})) %>% 
     mutate(sumExp = sum(exprob)) %>% 
