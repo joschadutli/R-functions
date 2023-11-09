@@ -1,6 +1,8 @@
 
 
 
+source("https://raw.githubusercontent.com/chenyu-psy/R-functions/main/after_model/mutate_fun.R")
+
 #' Generate data from M3 model
 #' 
 #' @param parsData a data frame with parameters
