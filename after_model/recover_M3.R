@@ -10,7 +10,7 @@ source("https://raw.githubusercontent.com/chenyu-psy/R-functions/main/after_mode
 #' @param formulas a formula variable, the formula use to calculate the value of new variable.
 #' @param nResp a number, the number of response options
 #' @param group a string, the name of the group variable
-gen_M3_data <- function(
+recover_M3 <- function(
     parsData,
     respOpts,
     formulas,
