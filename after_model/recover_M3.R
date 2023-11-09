@@ -1,7 +1,7 @@
 
 
 
-source("https://raw.githubusercontent.com/chenyu-psy/R-functions/main/after_model/mutate_fun.R")
+
 
 #' Generate data from M3 model
 #' 
@@ -16,6 +16,8 @@ recover_M3 <- function(
     formulas,
     group = c(".chain", ".iteartion", ".draw")
     ){
+  
+  source("https://raw.githubusercontent.com/chenyu-psy/R-functions/main/after_model/mutate_fun.R")
   
   ## check packages and install if necessary
   if (!require(dplyr)) {
