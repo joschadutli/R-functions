@@ -53,5 +53,5 @@ recover_M3 <- function(
     ungroup() %>% 
     mutate(prob = exprob / sumExp)
 
-    return(respData)
+    return(pData)
 }
