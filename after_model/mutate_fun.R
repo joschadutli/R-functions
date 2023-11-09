@@ -7,8 +7,10 @@
 #'
 mutate_fun <- function(.data, formulas) {
   
-  if (require(dplyr)) install.packages("dplyr")
-  if (require(stringr)) install.packages("stringr")
+  if (!require(tidyverse)) {
+    install.packages("tidyverse")
+    library("tidyverse")
+    }
   
   # copy the data frame
   results <- .data
