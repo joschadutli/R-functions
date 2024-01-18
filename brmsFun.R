@@ -292,9 +292,9 @@ Pairwise_Comparisons <- function(model, prior_model = NULL, specs, interaction =
     
     if (interaction) {
       post_contrasts <- emmeans::emmeans(model, par) %>% 
-        contrast(interaction = c("pairwise","pairwise"))
+        emmeans::contrast(interaction = c("pairwise","pairwise"))
       prior_contrasts <- emmeans::emmeans(prior_model, par) %>% 
-        contrast(interaction = c("pairwise","pairwise"))
+        emmeans::contrast(interaction = c("pairwise","pairwise"))
     } else {
       post_contrasts <- pairs(emmeans::emmeans(model, par))
       prior_contrasts <- pairs(emmeans::emmeans(prior_model, par))
